@@ -1,0 +1,1763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberFlix</title>
+    <style>
+        :root {
+            --neon-red: #ff003c;
+            --neon-blue: #00f3ff;
+            --matrix-green: #0f0;
+            --hologram-purple: #bc00ff;
+            --background: #0a0a0a;
+            --text-color: #ffffff;
+            --header-bg: rgba(10, 10, 10, 0.95);
+            --footer-bg: rgba(10, 10, 10, 0.95);
+            --genre-border: #00f3ff;
+            --genre-gradient-1: rgba(255, 0, 60, 0.1);
+            --genre-gradient-2: rgba(0, 0, 0, 0.8);
+        }
+
+        [data-theme="light"] {
+            --background: #f8f9fa;
+            --text-color: #2d3436;
+            --header-bg: rgba(248, 249, 250, 0.95);
+            --footer-bg: rgba(248, 249, 250, 0.95);
+            --neon-red: #e63946;
+            --neon-blue: #0077b6;
+            --hologram-purple: #7209b7;
+            --genre-border: rgba(0, 119, 182, 0.3);
+            --genre-gradient-1: rgba(230, 57, 70, 0.05);
+            --genre-gradient-2: rgba(255, 255, 255, 0.8);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            transition: background 0.3s, color 0.3s, border-color 0.3s;
+        }
+
+        body {
+            background: var(--background);
+            color: var(--text-color);
+            font-family: 'Courier New', monospace;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            scroll-behavior: smooth;
+        }
+
+        #particle-canvas {
+            position: fixed;
+         top: 0;
+         left: 0;
+         z-index: -1; /* Ensure it's behind content but still visible */
+         
+        }
+
+        .main-header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: var(--header-bg);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            border-bottom: 2px solid black;
+            padding: 1rem;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--neon-blue);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-color);
+            text-decoration: none;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background: var(--neon-red);
+            transition: width 0.3s;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .theme-toggle {
+            background: var(--neon-blue);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--background);
+        }
+
+        .theme-toggle span {
+            width: 20px;
+            height: 20px;
+            background: var(--background);
+            border-radius: 50%;
+            transition: transform 0.3s;
+        }
+
+        [data-theme="light"] .theme-toggle span {
+            transform: translateX(20px);
+        }
+
+        .cyber-header {
+            text-align: center;
+            padding: 5rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cyber-header h1 {
+            font-size: 4rem;
+            text-transform: uppercase;
+            animation: glitch 3s infinite;
+            text-shadow: 3px 3px var(--neon-red),
+                        -3px -3px var(--neon-blue);
+        }
+
+        @keyframes glitch {
+            0% { text-shadow: 3px 3px var(--neon-red), -3px -3px var(--neon-blue); }
+            25% { text-shadow: -5px 5px var(--neon-blue), 5px -5px var(--neon-red); }
+            50% { text-shadow: 5px -5px var(--neon-red), -5px 5px var(--neon-blue); }
+            75% { text-shadow: -3px -3px var(--neon-blue), 3px 3px var(--neon-red); }
+            100% { text-shadow: 3px 3px var(--neon-red), -3px -3px var(--neon-blue); }
+        }
+
+        .main-footer {
+            margin-top: auto;
+            background: var(--footer-bg);
+            border-top: 2px solid var(--neon-red);
+            padding: 2rem 1rem;
+            backdrop-filter: blur(10px);
+            
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .footer-section h3 {
+            color: var(--neon-blue);
+            margin-bottom: 1rem;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-links a {
+            color: var(--text-color);
+            text-decoration: none;
+        }
+
+        .footer-links a:hover {
+            color: var(--neon-red);
+        }
+
+
+        .genre-container {
+            max-width: 1200px; 
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .genre-section {
+            margin: 2rem 0;
+            border-radius: 15px;
+            width: 100%;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.5s;
+        }
+
+        /* Enhanced Genre Headers */
+        /* Base Genre Header Styles */
+    .genre-header {
+        padding: 1.5rem 2rem;
+        font-size: 2rem;
+        text-transform: uppercase;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.9s ease;
+        border: 2px solid;
+        background-size: cover;
+        background-position: center;
+        backdrop-filter: blur(2px);
+        margin: 1rem 0;
+    }
+
+.genre-header:hover{
+    transform: scale(0.985);
+}
+    
+
+
+
+/* [data-genre="action"] { --genre-color: linear-gradient(45deg, #ff003c, #8b0000); }
+[data-genre="sci-fi"] { --genre-color: linear-gradient(45deg, #00f3ff, #0066ff); }
+[data-genre="horror"] { --genre-color: linear-gradient(45deg, #8b0000, #2d0000); }
+[data-genre="comedy"] { --genre-color: linear-gradient(45deg, #ffd700, #ff9100); }
+[data-genre="romance"] { --genre-color: linear-gradient(45deg, #ff007f, #bc00ff); }
+[data-genre="thriller"] { --genre-color: linear-gradient(45deg, #6400ff, #2d007d); }
+[data-genre="drama"] { --genre-color: linear-gradient(45deg, #ffd700, #8b0000); }
+[data-genre="fantasy"] { --genre-color: linear-gradient(45deg, #bc00ff, #ff00ff); } */
+   
+    /* Action - Red Theme */
+    [data-genre="action"] .genre-header {
+        background: linear-gradient(145deg, 
+            rgba(255, 0, 60, 0.15),
+            rgba(0, 0, 0, 0.8)),
+            repeating-linear-gradient(45deg,
+                transparent 0px,
+                transparent 10px,
+                rgba(255,0,60,0.1) 10px,
+                rgba(255,0,60,0.1) 20px);
+        border-color: #ff003c;
+        text-shadow: 0 0 15px #ff003c;
+    }
+
+    [data-genre="action"] .genre-header::after {
+        content: '🔫';
+        position: absolute;
+        right: -50px;
+        top: 50%;
+        transform: translateY(-50%);
+        opacity: 0;
+        transition: all 0.3s ease;
+        filter: drop-shadow(0 0 5px #ff003c);
+    }
+
+    [data-genre="action"] .genre-header:hover::after {
+        right: 20px;
+        opacity: 1;
+        animation: fire 0.5s infinite;
+    }
+
+    @keyframes fire {
+        0%, 100% { transform: translateY(-50%) scale(1); }
+        50% { transform: translateY(-50%) scale(1.2); }
+    }
+
+    /* Adventure - Cyan Theme */
+    [data-genre="adventure"] .genre-header {
+        background: linear-gradient(145deg, 
+            rgba(0, 243, 255, 0.15),
+            rgba(0, 0, 0, 0.8)),
+            url('data:image/svg+xml,<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M50 15 L85 50 L50 85 L15 50 Z" fill="%2300f3ff" opacity="0.1"/></svg>');
+        border-color: #00f3ff;
+        text-shadow: 0 0 15px #00f3ff;
+    }
+
+    [data-genre="adventure"] .genre-header::before {
+        content: '🗺️';
+        position: absolute;
+        right: -50px;
+        top: 50%;
+        transform: translateY(-50%) rotate(0deg);
+        opacity: 0;
+        transition: all 0.5s ease;
+    }
+
+    [data-genre="adventure"] .genre-header:hover::before {
+        right: 20px;
+        opacity: 1;
+        animation: compass 2s infinite;
+    }
+
+    @keyframes compass {
+        0%, 100% { transform: translateY(-50%) rotate(0deg); }
+        50% { transform: translateY(-50%) rotate(180deg); }
+    }
+
+    /* Comedy - Yellow Theme */
+    [data-genre="comedy"] .genre-header {
+        background: linear-gradient(145deg, 
+            rgba(255, 215, 0, 0.15),
+            rgba(0, 0, 0, 0.8)),
+            repeating-linear-gradient(-45deg,
+                transparent,
+                transparent 10px,
+                rgba(255,215,0,0.1) 10px,
+                rgba(255,215,0,0.1) 20px);
+        border-color: #ffd700;
+        text-shadow: 0 0 15px #ffd700;
+    }
+
+    [data-genre="comedy"] .genre-header::after {
+        content: '😂';
+        position: absolute;
+        right: 20px;
+        opacity: 0;
+        transition: all 0.3s ease;
+        animation: laugh 1s infinite;
+    }
+
+    [data-genre="comedy"] .genre-header:hover::after {
+        opacity: 1;
+        right: 30px;
+    }
+
+    @keyframes laugh {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.2); }
+    }
+
+    /* Horror - Blood Red Theme */
+    [data-genre="horror"] .genre-header {
+        background: linear-gradient(145deg, 
+            rgba(139, 0, 0, 0.3),
+            rgba(0, 0, 0, 0.8)),
+            url('data:image/svg+xml,<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="40" fill="none" stroke="%238b0000" stroke-width="2" stroke-dasharray="4 4"/></svg>');
+        border-color: #8b0000;
+        text-shadow: 0 0 15px #8b0000;
+    }
+
+    [data-genre="horror"] .genre-header::before {
+        content: '🔪';
+        position: absolute;
+        left: 50%;
+        top: -30px;
+        transform: translateX(-50%);
+        opacity: 0;
+        transition: all 0.3s ease;
+    }
+
+    [data-genre="horror"] .genre-header:hover::before {
+        top: 15px;
+        opacity: 1;
+        animation: stab 0.5s forwards;
+    }
+
+    @keyframes stab {
+        0% { transform: translateX(-50%) rotate(0deg); }
+        100% { transform: translateX(-50%) rotate(-45deg); }
+    }
+
+    /* Sci-Fi - Blue Theme */
+    [data-genre="sci-fi"] .genre-header {
+        background: linear-gradient(145deg, 
+            rgba(0, 100, 255, 0.15),
+            rgba(0, 0, 0, 0.8)),
+            url('data:image/svg+xml,<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><polygon points="50,0 100,50 50,100 0,50" fill="%2300f3ff" opacity="0.1"/></svg>');
+        border-color: #00f3ff;
+        animation: sci-fi-glow 2s infinite alternate;
+        text-shadow: 0 0 15px #67ebf4;
+
+    }
+
+    [data-genre="sci-fi"] .genre-header::after {
+        content: '🛸';
+        position: absolute;
+        right: -50px;
+        top: 50%;
+        transform: translateY(-50%);
+        opacity: 0.5;
+        transition: all 1s ease-in-out;
+    }
+
+    [data-genre="sci-fi"] .genre-header:hover::after {
+        right: 20px;
+        opacity: 1;
+        animation: float 2s infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(-50%); }
+        50% { transform: translateY(-60%); }
+    }
+
+    /* Romance - Pink Theme */
+    [data-genre="romance"] .genre-header {
+        background: linear-gradient(145deg, 
+            rgba(255, 0, 127, 0.15),
+            rgba(0, 0, 0, 0.8)),
+            repeating-radial-gradient(circle at center,
+                rgba(255,0,127,0.1) 0%,
+                rgba(255,0,127,0.1) 10%,
+                transparent 10%,
+                transparent 20%);
+        border-color: #ff007f;
+        text-shadow: 0 0 15px #ff007f;  
+    }
+
+    [data-genre="romance"] .genre-header::before {
+        content: '💖';
+        position: absolute;
+        right: 20px;
+        animation: heartbeat 1.2s infinite;
+        opacity: 0;
+        transition: all 0.3s ease;
+    }
+
+    [data-genre="romance"] .genre-header:hover::before {
+        opacity: 1;
+        right: 30px;
+    }
+
+    @keyframes heartbeat {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.2); }
+    }
+
+    /* Thriller - Purple Theme */
+    [data-genre="thriller"] .genre-header {
+        background: linear-gradient(145deg, 
+            rgba(100, 0, 255, 0.15),
+            rgba(0, 0, 0, 0.8)),
+            repeating-linear-gradient(45deg,
+                transparent,
+                transparent 10px,
+                rgba(100,0,255,0.1) 10px,
+                rgba(100,0,255,0.1) 20px);
+        border-color: #6400ff;
+        text-shadow: 0 0 15px #6400ff;
+    }
+
+    [data-genre="thriller"] .genre-header::after {
+        content: '🕵️';
+        position: absolute;
+        right: -50px;
+        top: 50%;
+        transform: translateY(-50%);
+        opacity: 0;
+        transition: all 0.3s ease;
+    }
+
+    [data-genre="thriller"] .genre-header:hover::after {
+        right: 20px;
+        opacity: 1;
+        animation: search 2s infinite;
+    }
+
+    @keyframes search {
+        0%, 100% { transform: translateY(-50%) rotate(0deg); }
+        50% { transform: translateY(-50%) rotate(360deg); }
+    }
+
+    /* Drama - Gold Theme */
+    [data-genre="drama"] .genre-header {
+        background: linear-gradient(145deg, 
+            rgba(255, 215, 0, 0.15),
+            rgba(0, 0, 0, 0.8)),
+            url('data:image/svg+xml,<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><mask id="mask"><rect width="100" height="100" fill="white"/><path d="M20 20 L80 20 L80 80 L20 80 Z" fill="black"/></mask><rect width="100" height="100" fill="%23ffd700" mask="url(%23mask)" opacity="0.1"/></svg>');
+        border-color: #ffd700;
+        text-shadow: 0 0 15px #ffd700;
+    }
+
+    [data-genre="drama"] .genre-header::before {
+        content: '🎭';
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        opacity: 0;
+        transition: all 0.3s ease;
+    }
+
+    [data-genre="drama"] .genre-header:hover::before {
+        opacity: 1;
+        animation: drama 1s infinite;
+    }
+
+    @keyframes drama {
+        0%, 100% { transform: translateX(-50%) scale(1); }
+        50% { transform: translateX(-50%) scale(1.1); }
+    }
+
+    /* Fantasy - Magenta Theme */
+    [data-genre="fantasy"] .genre-header {
+        background: linear-gradient(145deg, 
+            rgba(255, 0, 255, 0.15),
+            rgba(0, 0, 0, 0.8)),
+            repeating-linear-gradient(60deg,
+                transparent,
+                transparent 10px,
+                rgba(255,0,255,0.1) 10px,
+                rgba(255,0,255,0.1) 20px);
+        border-color: #ff00ff;
+        text-shadow: 0 0 15px #ff00ff;
+    }
+
+    [data-genre="fantasy"] .genre-header::after {
+        content: '✨';
+        position: absolute;
+        right: 20px;
+        opacity: 0;
+        transition: all 0.3s ease;
+        animation: sparkle 1s infinite;
+    }
+
+    [data-genre="fantasy"] .genre-header:hover::after {
+        opacity: 1;
+        right: 30px;
+    }
+
+    @keyframes sparkle {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.5); }
+    }
+
+        .genre-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .genre-section.active .genre-content {
+            max-height: 2000px;
+        }
+
+        .movie-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+            padding: 2rem;
+        }
+
+        .movie-card {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            overflow: auto;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: all 0.5s;
+            cursor: pointer;
+        }
+
+        .movie-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 0 40px var(--hologram-purple);
+        }
+
+        .movie-image {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            border-bottom: 3px solid var(--neon-blue);
+        }
+
+        .movie-ReleaseDate{
+            font-family: monospace;
+            font-size: 20px;
+        }   
+
+        .movie-info {
+            padding: 1.5rem;
+            position: relative;
+        }
+
+        .movie-title {
+            color: var(--neon-blue);
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+
+
+        .movie-description {
+            color: white;
+            height: 0;
+            opacity: 0;
+            transition: all 0.5s;
+            overflow: auto;
+        }
+
+        .movie-card:hover .movie-description {
+            height: 100px;
+            opacity: 0.9;
+        }
+
+        .cyber-button{
+            margin-top: 15px;
+            border: none;
+            background-color: transparent;
+            color: white;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+
+        }
+
+        .cyber-button a{
+            color: white;
+            text-transform:uppercase;
+            font-family: monospace;
+            font-size: 18px;
+        }
+
+        /* Chatbot Styles */
+.cyber-chatbot {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 1000;
+    font-family: 'Courier New', monospace;
+}
+
+.chatbot-toggle {
+    background: var(--neon-blue);
+    color: var(--background);
+    padding: 1rem 2rem;
+    border-radius: 30px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 0 25px rgba(0, 243, 255, 0.5);
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+}
+
+.hologram-pulse {
+    width: 15px;
+    height: 15px;
+    background: var(--neon-red);
+    border-radius: 50%;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255, 0, 60, 0.7); }
+    70% { box-shadow: 0 0 0 15px rgba(255, 0, 60, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 0, 60, 0); }
+}
+
+.chatbot-container {
+    width: 350px;
+    height: 500px;
+    background: rgba(10, 10, 10, 0.95);
+    border: 2px solid var(--neon-blue);
+    border-radius: 15px;
+    margin-top: 1rem;
+    display: none;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 0 50px rgba(0, 243, 255, 0.3);
+    flex-direction: column;
+    position: fixed;
+    bottom: 100px;
+    right: 30px;
+}
+
+.chat-header {
+    padding: 1.5rem;
+    border-bottom: 2px solid var(--neon-blue);
+    background: linear-gradient(145deg, 
+        rgba(0, 243, 255, 0.1), 
+        rgba(188, 0, 255, 0.2));
+    position: relative;
+}
+
+.ai-avatar {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(45deg, 
+        var(--neon-blue), 
+        var(--hologram-purple),
+        var(--neon-blue));
+    border-radius: 50%;
+    margin-bottom: 1rem;
+    position: relative;
+    animation: aura-pulse 4s infinite linear;
+    box-shadow: 0 0 20px rgba(0, 243, 255, 0.3);
+}
+
+.ai-avatar::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    background: linear-gradient(45deg, 
+        var(--neon-blue),
+        var(--hologram-purple),
+        var(--neon-blue)); 
+    border-radius: 50%;
+    filter: blur(15px);
+    z-index: -1;
+    animation: color-rotate 3s infinite linear;
+}
+
+@keyframes color-rotate {
+    0% {
+        filter: blur(15px) hue-rotate(0deg);
+        opacity: 0.8;
+    }
+    50% {
+        filter: blur(20px) hue-rotate(180deg);
+        opacity: 1;
+    }
+    100% {
+        filter: blur(15px) hue-rotate(360deg);
+        opacity: 0.8;
+    }
+}
+
+@keyframes aura-pulse {
+    0%, 100% {
+        transform: scale(1);
+        background-position: 0% 50%;
+    }
+    50% {
+        transform: scale(1.05);
+        background-position: 100% 50%;
+    }
+}
+
+.chat-messages {
+    flex: 1;
+    padding: 1.5rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.chat-input {
+    display: flex;
+    padding: 1rem;
+    border-top: 2px solid var(--neon-blue);
+    background: rgba(0, 0, 0, 0.8);
+}
+
+#chatQuery {
+    flex: 1;
+    background: transparent;
+    border: 1px solid var(--neon-blue);
+    padding: 0.8rem;
+    color: var(--neon-blue);
+    border-radius: 5px 0 0 5px;
+}
+
+.cyber-send {
+    background: var(--neon-blue);
+    color: var(--background);
+    border: none;
+    padding: 0 1.5rem;
+    cursor: pointer;
+    border-radius: 0 5px 5px 0;
+    transition: all 0.3s;
+}
+
+.cyber-send:hover {
+    background: var(--hologram-purple);
+}
+
+/* Message Bubbles */
+.message {
+    padding: 1rem;
+    border-radius: 15px;
+    max-width: 80%;
+    animation: messageAppear 0.3s ease-out;
+}
+
+.user-message {
+    background: rgba(0, 243, 255, 0.15);
+    border: 1px solid var(--neon-blue);
+    align-self: flex-end;
+    color: white;
+}
+
+.bot-message {
+    background: rgba(188, 0, 255, 0.15);
+    border: 1px solid var(--hologram-purple);
+    align-self: flex-start;
+    color: white;
+}
+
+@keyframes messageAppear {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* Typing Animation */
+.typing-indicator {
+    display: inline-block;
+    padding: 1rem;
+}
+
+.typing-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin-right: 3px;
+    background: var(--neon-blue);
+    border-radius: 50%;
+    animation: typing 1.4s infinite;
+}
+
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typing {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-5px); }
+}
+
+.neon-text {
+    color: var(--neon-blue);
+    text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
+}
+
+.message strong {
+    color: var(--neon-red);
+    font-weight: normal;
+}
+
+.message.bot-message {
+    line-height: 1.6;
+    font-size: 0.95em;
+}
+
+.credits{
+   display: flex;
+    flex-direction: column;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    margin-top: 25px;
+}
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .cyber-header h1 {
+                font-size: 2.5rem;
+            }
+
+            .genre-header {
+                font-size: 1.5rem;
+                padding: 1rem;
+            }
+
+            .movie-image {
+                height: 300px;
+            }
+        }
+
+        .mobile-menu {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu {
+                display: block;
+            }
+            .nav-links {
+                display: none;
+                width: 100%;
+                flex-direction: column;
+                text-align: center;
+            }
+            .nav-links.active {
+                display: flex;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="particle-canvas"></canvas>
+    
+    <header class="main-header">
+        <div class="header-content">
+            <button class="mobile-menu" onclick="toggleMobileMenu()">☰</button>
+            <a href="#" class="logo">CYBERFLIX</a>
+            <nav class="nav-links">
+                <a href="#movies">Movies</a>
+                <a href="#genres">Genres</a>
+                <a href="#about">About</a>
+                <button class="theme-toggle" onclick="toggleTheme()">
+                    <span></span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main style="margin-top: 80px;">
+        <header class="cyber-header">
+            <h1>Welcome To CyberFlix</h1>
+            <p style="padding-left: 10%; padding-right: 10%; margin-top: 20px;">Here you will find my personal movie recommendations(non generic). And if you want to search about other movies, use our CINEBOT button anytime.</p>
+        </header>   
+
+        <div class="genre-container">
+            <!-- Action -->
+            <div class="genre-section" data-genre="action">
+                <div class="genre-header">Action</div>
+                <div class="genre-content">
+                    <div class="movie-grid">
+                        <div class="movie-card">
+                            <img src="oldGuardPoster.jpeg" class="movie-image" alt="Movie">
+                            <div class="movie-info">
+                                <h3 class="movie-title">The Old Guard</h3>
+                                <p class="movie-ReleaseDate" style="margin-bottom: 10px;">2020</p>
+                                <p class="movie-description">A covert team of immortal mercenaries, led by Andy When their secret is exposed, they must fight a ruthless pharmaceutical executive seeking to exploit their powers, while mentoring a newly discovered immortal, Nile.
+                                </p>
+                                <button class="cyber-button"><a href="https://www.imdb.com/title/tt7556122/">Know More</a></button>
+                            </div>
+                        </div>
+    
+                        <div class="movie-card">
+                            <img src="theNorthmanPoster.jpg" class="movie-image" alt="Movie">
+                            <div class="movie-info">
+                                <h3 class="movie-title">The Northman</h3>
+                                <p class="movie-ReleaseDate" style="margin-bottom: 10px;">2022</p>
+                                <p class="movie-description">Prince Amleth embarks on a relentless quest for revenge after his uncle murders his father and seizes the throne, blending myth, fate, and savage warfare. </p>
+                                <button class="cyber-button"><a href="https://www.imdb.com/title/tt11138512/">Know More</a></button>
+                            </div>
+                        </div>
+    
+                        <div class="movie-card">
+                            <img src="snowpiercerPoster.jpg" class="movie-image" alt="Movie">
+                            <div class="movie-info">
+                                <h3 class="movie-title">Snowpiercer</h3>
+                                <p class="movie-ReleaseDate" style="margin-bottom: 10px;">2013</p>
+                                <p class="movie-description">Humanity's last survivors live on a perpetually moving train, divided by class. As tensions rise, a rebellion led by Curtis challenges the oppressive system, uncovering dark secrets along the way.</p>
+                                <button class="cyber-button"> <a href="https://www.imdb.com/title/tt1706620/">Know More</a></button>
+                            </div>
+                        </div>
+    
+                        <div class="movie-card">
+                            <img src="theRaidRedemptionPoster.jpeg" class="movie-image" alt="Movie">
+                            <div class="movie-info">
+                                <h3 class="movie-title">The Raid: Redemption</h3>
+                                <p class="movie-ReleaseDate" style="margin-bottom: 10px;">2011</p>
+                                <p class="movie-description">A rookie SWAT officer, Rama, joins a raid on a crime lord's fortress-like apartment complex, only to be trapped inside, forcing him to fight for survival.</p>
+                                <button class="cyber-button"> <a href="https://www.imdb.com/title/tt1899353/">Know More</a></button>
+                            </div>
+                        </div>
+    
+                        <div class="movie-card">
+                            <img src="edgeOfTomorrowPoster.jpeg" class="movie-image" alt="Movie">
+                            <div class="movie-info">
+                                <h3 class="movie-title">Edge of tomorrow</h3>
+                                <p class="movie-ReleaseDate" style="margin-bottom: 10px;">2014</p>
+                                <p class="movie-description">When Earth is invaded by aliens, a soldier caught in a time loop must relive the same battle, improving his skills with each death to find a way to win the war.</p>
+                                <button class="cyber-button"> <a href="https://www.imdb.com/title/tt1631867/?ref_=ttpl_ov">Know More</a></button>
+                            </div>
+                        </div>
+    
+                        <div class="movie-card">
+                            <img src="bulletTrainPoster.jpg" class="movie-image" alt="Movie">
+                            <div class="movie-info">
+                                <h3 class="movie-title">Bullet train</h3>
+                                <p class="movie-ReleaseDate" style="margin-bottom: 10px;">2022</p>
+                                <p class="movie-description">A seasoned assassin is tasked with retrieving a briefcase on a high-speed train in Japan. His mission goes awry when he encounters lethal killers with interconnected motives, leading to a wild ride of twists, humor, and explosive action.</p>
+                                <button class="cyber-button"> <a href="https://www.imdb.com/title/tt12593682/">Know More</a></button>
+                            </div>
+                        </div>
+                        
+                        <!-- Movie cards will be inserted here -->
+                    </div>
+                </div>
+            </div>
+    
+            <!-- Adventure -->
+            <div class="genre-section" data-genre="adventure">
+                <div class="genre-header">Adventure</div>
+                <div class="genre-content">
+                    <div class="movie-grid">
+
+                        <div class="movie-card">
+                            <img src="intoTheWildPoster.jpg" class="movie-image" alt="Movie">
+                            <div class="movie-info">
+                                <h3 class="movie-title">Into the wild</h3>
+                                <p class="movie-ReleaseDate" style="margin-bottom: 10px;">2007</p>
+                                <p class="movie-description">Christopher McCandless, a young man abandons his conventional life and sets out on a journey into the Alaskan wilderness, seeking freedom and meaning in nature, but facing harsh realities along the way.</p> 
+                                <button class="cyber-button"> <a href="https://www.imdb.com/title/tt0758758/">Know More</a></button>
+                            </div>
+                        </div>
+
+                        <div class="movie-card">
+                            <img src="theSecretLifeOfWalterMittyPoster.jpeg" class="movie-image" alt="Movie">
+                            <div class="movie-info">
+                                <h3 class="movie-title">The secret life of Walter Mitty</h3>
+                                <p class="movie-ReleaseDate" style="margin-bottom: 10px;">2013</p>
+                                <p class="movie-description">A timid magazine editor escapes into daydreams of adventure. When a crucial photo goes missing, he embarks on a real journey across the globe, pushing his limits and discovering his true potential.</p> 
+                                <button class="cyber-button"> <a href="https://www.imdb.com/title/tt0359950/?ref_=fn_all_ttl_1">Know More</a></button>
+                            </div>
+                        </div>
+
+                        <div class="movie-card">
+                            <img src="kon-TikiPoster.jpg" class="movie-image" alt="Movie">
+                            <div class="movie-info">
+                                <h3 class="movie-title">Kon-Tiki</h3>
+                                <p class="movie-ReleaseDate" style="margin-bottom: 10px;">2012</p>
+                                <p class="movie-description">A Norwegian explorer Thor Heyerdahl embarks on a daring 4,300-mile journey across the Pacific Ocean on a wooden raft. Driven by his theory about ancient sea migration, he and his crew battle storms, sharks, and the unknown to prove history wrong.</p> 
+                                <button class="cyber-button"> <a href="https://www.imdb.com/title/tt1613750/?ref_=int_ratm_t_24">Know More</a></button>
+                            </div>
+                        </div>
+
+                        <div class="movie-card">
+                            <img src="wildPoster.jpeg" class="movie-image" alt="Movie">
+                            <div class="movie-info">
+                                <h3 class="movie-title">Wild</h3>
+                                <p class="movie-ReleaseDate" style="margin-bottom: 10px;">2014</p>
+                                <p class="movie-description">Cheryl Strayed embarks on a 1,100-mile solo hike along the Pacific Crest Trail to heal from personal loss and past mistakes. Facing harsh conditions and self-doubt, her journey becomes one of resilience, redemption, and self-discovery.</p> 
+                                <button class="cyber-button"> <a href="https://www.imdb.com/title/tt2305051/">Know More</a></button>
+                            </div>
+                        </div>
+
+                        <div class="movie-card">
+                            <img src="leaveNoTracePoster.jpg" class="movie-image" alt="Movie">
+                            <div class="movie-info">
+                                <h3 class="movie-title">Leave No Trace</h3>
+                                <p class="movie-ReleaseDate" style="margin-bottom: 10px;">2018</p>
+                                <p class="movie-description">A father and his teenage daughter who live off the grid in the forests of Oregon. When authorities discover their secluded life, they must navigate a world they've tried to avoid, challenging their bond and way of living.</p> 
+                                <button class="cyber-button"> <a href="https://www.imdb.com/title/tt3892172/">Know More</a></button>
+                            </div>
+                        </div>
+
+                        <div class="movie-card">
+                            <img src="theMotorcycleDiariesPoster.jpg" class="movie-image" alt="Movie">
+                            <div class="movie-info">
+                                <h3 class="movie-title">The Motorcycle Diaries</h3>
+                                <p class="movie-ReleaseDate" style="margin-bottom: 10px;">2004</p>
+                                <p class="movie-description">Ernesto Guevara de la Serna, popularly known as "Che" and his friend Alberto Granado sets off on a motorcycle journer across South America. Their journey exposes them to breathtaking landscapes and harsh social realities, deeply influencing Guevara's perspective and shaping his future beliefs.</p> 
+                                <button class="cyber-button"> <a href="https://www.imdb.com/title/tt0318462/">Know More</a></button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+    
+            <!-- Comedy, little miss sunshine, game night, central intelligence, the hangover -->
+            <div class="genre-section" data-genre="comedy">
+                <div class="genre-header">Comedy</div>
+                <div class="genre-content">
+                    <div class="movie-grid">
+
+                        <div class="movie-card">
+                            <img src="littleMissSunshinePoster.jpg" class="movie-image" alt="Movie">
+                            <div class="movie-info">
+                                <h3 class="movie-title">Little miss sunshine</h3>
+                                <p class="movie-ReleaseDate" style="margin-bottom: 10px;">2006</p>
+                                <p class="movie-description">A quirky, dysfunctional family take a cross-country road trip in a broken-down van to support their young daughter's dream of competing in a beauty pageant. Along the way, they face challenges, conflicts, and heartfelt moments that bring them closer together.</p> 
+                                <button class="cyber-button"> <a href="https://www.imdb.com/title/tt0449059/">Know More</a></button>
+                            </div>
+                        </div>
+
+                        <div class="movie-card">
+                            <img src="gameNightPoster.jpeg" class="movie-image" alt="Movie">
+                            <div class="movie-info">
+                                <h3 class="movie-title">Game night</h3>
+                                <p class="movie-ReleaseDate" style="margin-bottom: 10px;">2018</p>
+                                <p class="movie-description">A competitive couple's regular game night takes a wild turn when a staged mystery turns real. As they and their friends navigate kidnappings, conspiracies, and unexpected twists, their night spirals into a chaotic and hilarious adventure.</p> 
+                                <button class="cyber-button"> <a href="https://www.imdb.com/title/tt2704998/">Know More</a></button>
+                            </div>
+                        </div>
+
+                        <div class="movie-card">
+                            <img src="centralintelligencePoster.jpg" class="movie-image" alt="Movie">
+                            <div class="movie-info">
+                                <h3 class="movie-title">Central intelligence</h3>
+                                <p class="movie-ReleaseDate" style="margin-bottom: 10px;">2016</p>
+                                <p class="movie-description">A mild-mannered accountant who reconnects with an old high school classmate, now a rogue CIA agent. Pulled into a dangerous mission, he's forced into a world of espionage, action, and comedy, questioning who he can really trust.</p> 
+                                <button class="cyber-button"> <a href="https://www.imdb.com/title/tt1489889/">Know More</a></button>
+                            </div>
+                        </div>
+
+                        <div class="movie-card">
+                            <img src="theHangoverPoster.jpg" class="movie-image" alt="Movie">
+                            <div class="movie-info">
+                                <h3 class="movie-title">The hangover</h3>
+                                <p class="movie-ReleaseDate" style="margin-bottom: 10px;">2009</p>
+                                <p class="movie-description">Three friends wake up in Las Vegas after a wild bachelor party with no memory of the night before—and the groom missing. As they retrace their steps through bizarre encounters and hilarious mishaps, they must piece together the chaos to find him before the wedding.</p> 
+                                <button class="cyber-button"> <a href="https://www.imdb.com/title/tt1119646/">Know More</a></button>
+                            </div>
+                        </div>
+
+                        <div class="movie-card">
+                            <img src="theNiceGuysPoster.jpg" class="movie-image" alt="Movie">
+                            <div class="movie-info">
+                                <h3 class="movie-title">The nice guys</h3>
+                                <p class="movie-ReleaseDate" style="margin-bottom: 10px;">2016</p>
+                                <p class="movie-description">This movie follows a a down-on-his-luck private investigator and a tough enforcer in 1970s Los Angeles. As they reluctantly team up to find a missing girl, they uncover a dangerous conspiracy filled with crime, corruption, and chaos.</p> 
+                                <button class="cyber-button"> <a href="https://www.imdb.com/title/tt3799694/">Know More</a></button>
+                            </div>
+                        </div>
+
+                        <div class="movie-card">
+                            <img src="johnnyEnglishPoster.jpg" class="movie-image" alt="Movie">
+                            <div class="movie-info">
+                                <h3 class="movie-title">Johnny english</h3>
+                                <p class="movie-ReleaseDate" style="margin-bottom: 10px;">2003</p>
+                                <p class="movie-description">Johnny English is a clumsy yet confident British secret agent. When all other MI7 agents are eliminated, he becomes the country's last hope to stop a cunning villain from stealing the Crown Jewels, leading to a series of hilarious mishaps.</p> 
+                                <button class="cyber-button"> <a href="https://www.imdb.com/title/tt0274166/">Know More</a></button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+    
+            <!-- Thriller the call, reservoir dogs, memento, butterfly effect, LA confidential, fractured-->
+            <div class="genre-section" data-genre="thriller">
+                <div class="genre-header">Mystery / thriller</div>
+                <div class="genre-content">
+                    <div class="movie-grid">
+
+                        <div class="movie-card">
+                            <img src="theCallPoster.jpeg" class="movie-image" alt="Movie">
+                            <div class="movie-info">
+                                <h3 class="movie-title">The call</h3>
+                                <p class="movie-ReleaseDate" style="margin-bottom: 10px;">2020</p>
+                                <p class="movie-description">A woman finds an old phone that mysteriously connects her to someone from the past. As they form an unexpected bond, their connection leads to shocking and unpredictable consequences.</p> 
+                                <button class="cyber-button"> <a href="https://www.imdb.com/title/tt10530176/">Know More</a></button>
+                            </div>
+                        </div>
+
+                        <div class="movie-card">
+                            <img src="resrervoirDogsPoster.jpg" class="movie-image" alt="Movie">
+                            <div class="movie-info">
+                                <h3 class="movie-title">Reservoir dogs</h3>
+                                <p class="movie-ReleaseDate" style="margin-bottom: 10px;">1992</p>
+                                <p class="movie-description">After a botched diamond heist, a group of criminals gathers at a warehouse, suspecting one of them is an informant. As tensions rise, betrayal, violence, and dark humor unravel the truth.</p> 
+                                <button class="cyber-button"> <a href="https://www.imdb.com/title/tt0105236/">Know More</a></button>
+                            </div>
+                        </div>
+
+                        <div class="movie-card">
+                            <img src="mementoPoster.jpg" class="movie-image" alt="Movie">
+                            <div class="movie-info">
+                                <h3 class="movie-title">Memento</h3>
+                                <p class="movie-ReleaseDate" style="margin-bottom: 10px;">2000</p>
+                                <p class="movie-description">This movie is about a man with short-term memory loss who uses notes and tattoos to track down his wife's killer. Told in a unique non-linear structure, the film exposes a gripping mystery as past and present collide.</p> 
+                                <button class="cyber-button"> <a href="https://www.imdb.com/title/tt0209144/?ref_=nv_sr_srsg_0_tt_8_nm_0_in_0_q_memento">Know More</a></button>
+                            </div>
+                        </div>
+
+                        <div class="movie-card">
+                            <img src="theButterflyEffectPoster.jpeg" class="movie-image" alt="Movie">
+                            <div class="movie-info">
+                                <h3 class="movie-title">The butterfly effect</h3>
+                                <p class="movie-ReleaseDate" style="margin-bottom: 10px;">2004</p>
+                                <p class="movie-description">Evan Treborn experiences blackouts during significant moments in his life. As he gets older, he discovers a way to recover these lost memories and mysteriously change his past by reading his journal.</p> 
+                                <button class="cyber-button"> <a href="https://www.imdb.com/title/tt0289879/?ref_=nv_sr_srsg_0_tt_8_nm_0_in_0_q_the%2520butterfly%2520effect">Know More</a></button>
+                            </div>
+                        </div>
+
+                        <div class="movie-card">
+                            <img src="laConfidentialPoster.jpeg" class="movie-image" alt="Movie">
+                            <div class="movie-info">
+                                <h3 class="movie-title">L.A. Confidential</h3>
+                                <p class="movie-ReleaseDate" style="margin-bottom: 10px;">1997</p>
+                                <p class="movie-description">In 1950s Los Angeles, Three detectives with different approaches delve into a violent murder case, exposing deep-seated corruption, Hollywood secrets, and criminal conspiracies lurking beneath the city's glamorous façade.</p> 
+                                <button class="cyber-button"> <a href="https://www.imdb.com/title/tt0119488/?ref_=nv_sr_srsg_0_tt_8_nm_0_in_0_q_L.A%2520con">Know More</a></button>
+                            </div>
+                        </div>
+
+                        <div class="movie-card">
+                            <img src="fracturedPoster.jpeg" class="movie-image" alt="Movie">
+                            <div class="movie-info">
+                                <h3 class="movie-title">Fractured</h3>
+                                <p class="movie-ReleaseDate" style="margin-bottom: 10px;">2019</p>
+                                <p class="movie-description">A man rushes his injured daughter to a hospital, only for her and his wife to mysteriously vanish. As he desperately searches for answers, he begins to question reality and his own sanity.</p> 
+                                <button class="cyber-button"> <a href="https://www.imdb.com/title/tt4332232/?ref_=nv_sr_srsg_0_tt_8_nm_0_in_0_q_fract">Know More</a></button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+    
+            <!-- Romance eternal sunshine, curious case, 3-iron, the band's visit, her(2013), in the mood for love-->
+            <div class="genre-section" data-genre="romance">
+                <div class="genre-header">Romance</div>
+                <div class="genre-content">
+                    <div class="movie-grid">
+
+                        <div class="movie-card">
+                            <img src="eternalSunshineOfTheSpotlessMindPoster.jpeg" class="movie-image" alt="Movie">
+                            <div class="movie-info">
+                                <h3 class="movie-title">Eternal sunshine of the spotless mind</h3>
+                                <p class="movie-ReleaseDate" style="margin-bottom: 10px;">2004</p>
+                                <p class="movie-description">A heartbroken man undergoes a procedure to erase memories of his ex-girlfriend. As his memories fade, he realizes he doesn't want to let her go.</p> 
+                                <button class="cyber-button"> <a href="https://www.imdb.com/title/tt0338013/?ref_=nv_sr_srsg_0_tt_8_nm_0_in_0_q_eternal%2520sunshine">Know More</a></button>
+                            </div>
+                        </div>
+
+                        <div class="movie-card">
+                            <img src="theCuriousCaseofBenjaminButtonPoster.jpg" class="movie-image" alt="Movie">
+                            <div class="movie-info">
+                                <h3 class="movie-title">The curious case of benjamin button</h3>
+                                <p class="movie-ReleaseDate" style="margin-bottom: 10px;">2008</p>
+                                <p class="movie-description">This movie is about a man who is born with a rare condition that causes him to age in reverse. As he navigates life and love, he experiences time and relationships in a profoundly unique way.</p> 
+                                <button class="cyber-button"> <a href="https://www.imdb.com/title/tt0421715/?ref_=nv_sr_srsg_1_tt_4_nm_3_in_0_q_the%2520curious%2520case%2520of%2520be">Know More</a></button>
+                            </div>
+                        </div>
+
+                        <div class="movie-card">
+                            <img src="3-ironPoster.jpg" class="movie-image" alt="Movie">
+                            <div class="movie-info">
+                                <h3 class="movie-title">3-iron</h3>
+                                <p class="movie-ReleaseDate" style="margin-bottom: 10px;">2004</p>
+                                <p class="movie-description">A silent drifter who sneaks into empty homes, living in them while the owners are away. When he meets a woman trapped in an abusive marriage, their quiet connection leads to an unusual and haunting love story.</p> 
+                                <button class="cyber-button"> <a href="https://www.imdb.com/title/tt0423866/?ref_=nv_sr_srsg_0_tt_1_nm_0_in_0_q_3-iron%25202004">Know More</a></button>
+                            </div>
+                        </div>
+
+                        <div class="movie-card">
+                            <img src="theScienceOfSleepPoster.jpeg" class="movie-image" alt="Movie">
+                            <div class="movie-info">
+                                <h3 class="movie-title">The science of sleep</h3>
+                                <p class="movie-ReleaseDate" style="margin-bottom: 10px;">2006</p>
+                                <p class="movie-description">Stéphane, a man with a vivid imagination struggles to distinguish dreams from reality. As he falls for his neighbor Stéphanie, his dream world begins to blend with real life, creating a whimsical yet complicated love story.</p> 
+                                <button class="cyber-button"> <a href="https://www.imdb.com/title/tt0354899/">Know More</a></button>
+                            </div>
+                        </div>
+
+                        <div class="movie-card">
+                            <img src="herPoster.jpg" class="movie-image" alt="Movie">
+                            <div class="movie-info">
+                                <h3 class="movie-title">Her</h3>
+                                <p class="movie-ReleaseDate" style="margin-bottom: 10px;">2013</p>
+                                <p class="movie-description">A lonely writer forms an intimate bond with an advanced AI operating system. As their relationship deepens, he navigates love, identity, and the evolving nature of human connection.</p> 
+                                <button class="cyber-button"> <a href="https://www.imdb.com/title/tt1798709/?ref_=nv_sr_srsg_0_tt_8_nm_0_in_0_q_her%25202013.">Know More</a></button>
+                            </div>
+                        </div>
+
+                        <div class="movie-card">
+                            <img src="inTheMoodForLovePoster.jpeg" class="movie-image" alt="Movie">
+                            <div class="movie-info">
+                                <h3 class="movie-title">In the mood for love</h3>
+                                <p class="movie-ReleaseDate" style="margin-bottom: 10px;">2000</p>
+                                <p class="movie-description">Two neighbors in 1960s Hong Kong discover their spouses are having an affair. As they form a deep but restrained connection, unspoken emotions and longing shape their beautifully melancholic relationship.</p> 
+                                <button class="cyber-button"> <a href="https://www.imdb.com/title/tt0118694/">Know More</a></button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+    
+            <!-- Horror the sadness, shutter, -->
+            <div class="genre-section" data-genre="horror">
+                <div class="genre-header">Horror</div>
+                <div class="genre-content">
+                    <div class="movie-grid">
+
+                        <div class="movie-card">
+                            <img src="theSadnessPoster.jpeg" class="movie-image" alt="Movie">
+                            <div class="movie-info">
+                                <h3 class="movie-title">The sadness</h3>
+                                <p class="movie-ReleaseDate" style="margin-bottom: 10px;">2021</p>
+                                <p class="movie-description">Set in Taiwan, where a mysterious virus transforms people into deranged, sadistic killers. As society collapses into chaos, a young couple fights to reunite while facing the unimaginable horrors of the infected.</p> 
+                                <button class="cyber-button"> <a href="https://www.imdb.com/title/tt13872248/">Know More</a></button>
+                            </div>
+                        </div>
+
+                        <div class="movie-card">
+                            <img src="shutterPoster.jpg" class="movie-image" alt="Movie">
+                            <div class="movie-info">
+                                <h3 class="movie-title">Shutter</h3>
+                                <p class="movie-ReleaseDate" style="margin-bottom: 10px;">2004</p>
+                                <p class="movie-description">This film is about a photographer and his girlfriend who begin seeing eerie figures in their photos after a tragic accident. As they investigate, they uncover a chilling truth that ties the haunting to their past.</p> 
+                                <button class="cyber-button"> <a href="https://www.imdb.com/title/tt0440803/?ref_=nv_sr_srsg_0_tt_8_nm_0_in_0_q_shutter%25202004">Know More</a></button>
+                            </div>
+                        </div>
+
+                        <div class="movie-card">
+                            <img src="oculusPoster.jpg" class="movie-image" alt="Movie">
+                            <div class="movie-info">
+                                <h3 class="movie-title">Oculus</h3>
+                                <p class="movie-ReleaseDate" style="margin-bottom: 10px;">2013</p>
+                                <p class="movie-description">A woman tries to prove that an antique mirror is responsible for her family's tragic past. As she and her brother confront its dark history, reality bends, leading to a terrifying battle against its malevolent force.</p> 
+                                <button class="cyber-button"> <a href="https://www.imdb.com/title/tt2388715/?ref_=nv_sr_srsg_0_tt_8_nm_0_in_0_q_oculus%25202013">Know More</a></button>
+                            </div>
+                        </div>
+
+                        <div class="movie-card">
+                            <img src="noroiTheCursePoster.jpg" class="movie-image" alt="Movie">
+                            <div class="movie-info">
+                                <h3 class="movie-title">Noroi: the curse</h3>
+                                <p class="movie-ReleaseDate" style="margin-bottom: 10px;">2005</p>
+                                <p class="movie-description">Renowned paranormal journalist Kobayashi mysteriously disappears after finishing a documentary. What starts as an inquiry into eerie disturbances unravels into a terrifying journey, exposing a sinister force tied to the ancient demon Kagutaba.</p> 
+                                <button class="cyber-button"> <a href="https://www.imdb.com/title/tt0930083/?ref_=nv_sr_srsg_0_tt_8_nm_0_in_0_q_noroi">Know More</a></button>
+                            </div>
+                        </div>
+
+                        <div class="movie-card">
+                            <img src="pulsePoster.jpg" class="movie-image" alt="Movie">
+                            <div class="movie-info">
+                                <h3 class="movie-title">Pulse</h3>
+                                <p class="movie-ReleaseDate" style="margin-bottom: 10px;">2001</p>
+                                <p class="movie-description">A group of people in Tokyo begins experiencing strange encounters with eerie, shadowy figures through the internet. As suicides rise and the city falls into despair, they uncover a horrifying truth—ghosts have found a way to invade the world of the living through technology.</p> 
+                                <button class="cyber-button"> <a href="https://www.imdb.com/title/tt0286751/?ref_=fn_all_ttl_2">Know More</a></button>
+                            </div>
+                        </div>
+
+                        <div class="movie-card">
+                            <img src="comingSoonPoster.jpg" class="movie-image" alt="Movie">
+                            <div class="movie-info">
+                                <h3 class="movie-title">Coming soon</h3>
+                                <p class="movie-ReleaseDate" style="margin-bottom: 10px;">2008</p>
+                                <p class="movie-description">After taking part in an illegal recording of a horror film, a projectionist begins experiencing terrifying visions of the movie’s vengeful ghost. As reality and fiction blur, he must uncover the dark truth behind the film before he becomes its next victim.</p> 
+                                <button class="cyber-button"> <a href="https://www.imdb.com/title/tt1307057/?ref_=nv_sr_srsg_0_tt_4_nm_0_in_0_q_coming%2520soon%25202008">Know More</a></button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+    
+            <!-- Sci-Fi 12 monkeys, -->
+            <div class="genre-section" data-genre="sci-fi">
+                <div class="genre-header">Sci-Fi</div>
+                <div class="genre-content">
+                    <div class="movie-grid">
+
+                        <div class="movie-card">
+                            <img src="12MonkeysPoster.jpg" class="movie-image" alt="Movie">
+                            <div class="movie-info">
+                                <h3 class="movie-title">12 Monkeys</h3>
+                                <p class="movie-ReleaseDate" style="margin-bottom: 10px;">1995</p>
+                                <p class="movie-description">In a dystopian future ravaged by a deadly virus, a convict is sent back in time to uncover the origins of the outbreak. As he navigates a chaotic past, he questions his own sanity while searching for the mysterious "Army of the 12 Monkeys."</p> 
+                                <button class="cyber-button"> <a href="https://www.imdb.com/title/tt0114746/">Know More</a></button>
+                            </div>
+                        </div>
+
+                        <div class="movie-card">
+                            <img src="moonPoster.webp" class="movie-image" alt="Movie">
+                            <div class="movie-info">
+                                <h3 class="movie-title">Moon</h3>
+                                <p class="movie-ReleaseDate" style="margin-bottom: 10px;">2009</p>
+                                <p class="movie-description">A lone astronaut, nearing the end of his three-year mission on the Moon, begins experiencing strange occurrences and unsettling revelations. As he uncovers the truth about his existence, he questions his reality, his identity, and the corporation that sent him there.</p> 
+                                <button class="cyber-button"> <a href="https://www.imdb.com/title/tt1182345/">Know More</a></button>
+                            </div>
+                        </div>
+
+                        <div class="movie-card">
+                            <img src="anotherEarthPoster.jpeg" class="movie-image" alt="Movie">
+                            <div class="movie-info">
+                                <h3 class="movie-title">Another Earth</h3>
+                                <p class="movie-ReleaseDate" style="margin-bottom: 10px;">2011</p>
+                                <p class="movie-description">On the night a duplicate Earth is discovered in the sky, a tragic accident alters the lives of a brilliant young woman and a grieving composer. As their paths intertwine, the possibility of a second chance on the new Earth looms, blurring the lines between fate and redemption.</p> 
+                                <button class="cyber-button"> <a href="https://www.imdb.com/title/tt1549572/">Know More</a></button>
+                            </div>
+                        </div>
+
+                        <div class="movie-card">
+                            <img src="gattacaPoster.jpeg" class="movie-image" alt="Movie">
+                            <div class="movie-info">
+                                <h3 class="movie-title">Gattaca</h3>
+                                <p class="movie-ReleaseDate" style="margin-bottom: 10px;">1997</p>
+                                <p class="movie-description">In a future where genetic perfection determines destiny, a naturally conceived man assumes a new identity to pursue his dream of space travel. As he navigates a world of rigid eugenics, a murder investigation threatens to expose his carefully crafted deception.</p> 
+                                <button class="cyber-button"> <a href="https://www.imdb.com/title/tt0119177/">Know More</a></button>
+                            </div>
+                        </div>
+
+                        <div class="movie-card">
+                            <img src="sunshinePoster.jpg" class="movie-image" alt="Movie">
+                            <div class="movie-info">
+                                <h3 class="movie-title">Sunshine</h3>
+                                <p class="movie-ReleaseDate" style="margin-bottom: 10px;">2007</p>
+                                <p class="movie-description">In the year 2057, a crew of astronauts embarks on a perilous mission to reignite the dying Sun with a massive nuclear payload. As they approach their destination, they face technical failures, psychological strain, and a chilling discovery that threatens their mission—and humanity’s survival.</p> 
+                                <button class="cyber-button"> <a href="https://www.imdb.com/title/tt0448134/?ref_=nv_sr_srsg_0_tt_7_nm_1_in_0_q_sunshine">Know More</a></button>
+                            </div>
+                        </div>
+
+                        <div class="movie-card">
+                            <img src="donnieDarkoPoster.jpg" class="movie-image" alt="Movie">
+                            <div class="movie-info">
+                                <h3 class="movie-title">Donnie Darko</h3>
+                                <p class="movie-ReleaseDate" style="margin-bottom: 10px;">2001</p>
+                                <p class="movie-description">A troubled teenager, Donnie Darko, narrowly escapes a bizarre accident and begins having visions of a menacing figure in a rabbit suit. As he follows cryptic messages about time travel and fate, reality starts to distort, leading him toward a dark and mysterious truth.</p> 
+                                <button class="cyber-button"> <a href="https://www.imdb.com/title/tt0246578/?ref_=nv_sr_srsg_0_tt_2_nm_6_in_0_q_donnie">Know More</a></button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+    
+            <!-- Drama ,  a beautiful mind, american history x, -->
+            <div class="genre-section" data-genre="drama">
+                <div class="genre-header">Drama</div>
+                <div class="genre-content">
+                    <div class="movie-grid"></div>
+                </div>
+            </div>
+    
+            <!-- Fantasy, big fish, edward scissorhands,  -->
+            <div class="genre-section" data-genre="fantasy">
+                <div class="genre-header">Fantasy</div>
+                <div class="genre-content">
+                    <div class="movie-grid"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="main-footer">
+        <!-- Footer content remains same -->
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Explore</h3>
+                <ul class="footer-links">
+                    <li><a href="#movies">New Releases</a></li>
+                    <li><a href="#genres">Genres</a></li>
+                    <li><a href="#trending">Trending</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Legal</h3>
+                <ul class="footer-links">
+                    <li><a href="#privacy">Privacy Policy</a></li>
+                    <li><a href="#terms">Terms of Service</a></li>
+                    <li><a href="#cookies">Cookie Settings</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Connect</h3>
+                <ul class="footer-links">
+                    <li><a href="#twitter">Twitter</a></li>
+                    <li><a href="#instagram">Instagram</a></li>
+                    <li><a href="#discord">Discord</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="credits"    > <p> Thanks to TMDB API, the project is successful. </p>
+    <img src="tmdb.svg" alt="TMDB" height="35px" width="200px"> </div>
+
+    </footer>
+
+
+    <div class="cyber-chatbot">
+        <div class="chatbot-toggle">
+            <div class="hologram-pulse"></div>
+            <span>AI CINEBOT</span>
+        </div>
+        <div class="chatbot-container">
+            <div class="chat-header">
+                <div class="ai-avatar"></div>
+                <h3 style="color: white;">NEURAL RECOMMENDATION ENGINE</h3>
+            </div>
+            <div class="chat-messages"></div>
+            <div class="chat-input">
+                <input type="text" placeholder="Enter movie preferences..." id="chatQuery">
+                <button class="cyber-send">SEND</button>
+            </div>
+        </div>
+    </div>  
+   
+    <script>
+         // Theme Toggle
+         function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme') || 'dark';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            // Update particle colors
+            particles.forEach(particle => {
+                particle.color = newTheme === 'dark' 
+                    ? `hsl(${Math.random() * 360}, 70%, 50%)`
+                    : `hsl(${Math.random() * 360}, 50%, 70%)`;
+            });
+        }
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            document.body.setAttribute('data-theme', savedTheme);
+        }
+
+        // Mobile Menu
+        function toggleMobileMenu() {
+            document.querySelector('.nav-links').classList.toggle('active');
+        }
+
+        // Particle System
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 1;
+                this.speedX = (Math.random() - 0.5) * 2;
+                this.speedY = (Math.random() - 0.5) * 2;
+                this.color = document.body.getAttribute('data-theme') === 'dark'
+                    ? `hsl(${Math.random() * 360}, 70%, 50%)`
+                    : `hsl(${Math.random() * 360}, 50%, 70%)`;
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                if(this.x > canvas.width) this.x = 0;
+                if(this.x < 0) this.x = canvas.width;
+                if(this.y > canvas.height) this.y = 0;
+                if(this.y < 0) this.y = canvas.height;
+            }
+
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+
+        }
+
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let particles = Array(100).fill().map(() => new Particle());
+
+        function animate() {
+            ctx.fillStyle = document.body.getAttribute('data-theme') === 'dark'
+                ? 'rgba(10, 10, 10, 0.05)'
+                : 'rgba(248, 249, 250, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        // Genre Section Toggle
+        document.querySelectorAll('.genre-section').forEach(section => {
+            const header = section.querySelector('.genre-header');
+            header.addEventListener('click', () => {
+                section.classList.toggle('active');
+            });
+        });
+
+
+        // Initialize hover effects
+        function initCardHoverEffects() {
+            document.querySelectorAll('.movie-card').forEach(card => {
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    card.style.transform = `translateY(-10px) rotateX(${(y - rect.height/2)/-10}deg) rotateY(${(x - rect.width/2)/10}deg)`;
+                });
+                
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'translateY(0) rotateX(0) rotateY(0)';
+                });
+            });
+        }
+
+
+        
+        // Movie Card Hover Effects
+        function initCardHoverEffects() {
+            document.querySelectorAll('.movie-card').forEach(card => {
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    card.style.transform = `translateY(-10px) rotateX(${(y - rect.height/2)/-10}deg) rotateY(${(x - rect.width/2)/10}deg)`;
+                });
+                
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'translateY(0) rotateX(0) rotateY(0)';
+                });
+            });
+        }
+
+        initCardHoverEffects();
+
+        // TMDB API Configuration
+const TMDB_API_KEY = '43ded7f4b677e3c4ab1c6d51c872b82a'; // Get this from https://www.themoviedb.org/settings/api
+const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
+
+// Chat Elements
+const chatbotToggle = document.querySelector('.chatbot-toggle');
+const chatbotContainer = document.querySelector('.chatbot-container');
+const chatMessages = document.querySelector('.chat-messages');
+const chatInput = document.getElementById('chatQuery');
+const sendButton = document.querySelector('.cyber-send');
+
+// Toggle Chat Visibility
+chatbotToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isVisible = chatbotContainer.style.display === 'flex';
+    chatbotContainer.style.display = isVisible ? 'none' : 'flex';
+});
+
+// Close Chat When Clicking Outside
+document.addEventListener('click', (e) => {
+    if (!chatbotContainer.contains(e.target) && !chatbotToggle.contains(e.target)) {
+        chatbotContainer.style.display = 'none';
+    }
+});
+
+// Movie Recommendation Functions
+async function searchMovies(query) {
+    try {
+        const response = await fetch(
+            `${TMDB_BASE_URL}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}`
+        );
+        const data = await response.json();
+        return data.results.slice(0, 3); // Return top 3 results
+    } catch (error) {
+        console.error('Error searching movies:', error);
+        return [];
+    }
+}
+
+async function getPopularMovies() {
+    try {
+        const response = await fetch(
+            `${TMDB_BASE_URL}/movie/popular?api_key=${TMDB_API_KEY}`
+        );
+        const data = await response.json();
+        return data.results.slice(0, 5); // Return top 5 popular
+    } catch (error) {
+        console.error('Error fetching popular movies:', error);
+        return [];
+    }
+}
+
+async function generateRecommendations(query) {
+    try {
+        const searchResults = await searchMovies(query);
+        
+        if (searchResults.length > 0) {
+            const recommendations = searchResults.map(movie => 
+                formatMovieResponse(movie)
+            ).join('');
+            
+            return `Here are recommendations for "${query}":<br>${recommendations}`;
+        }
+        
+        const popularMovies = await getPopularMovies();
+        const popularList = popularMovies.map(movie => 
+            formatMovieResponse(movie)
+        ).join('');
+        
+        return `Showing popular films instead:<br>${popularList}`;
+        
+    } catch (error) {
+        return 'System error: Failed to access movie database.';
+    }
+}
+
+function formatMovieResponse(movie) {
+    return `
+        <div class="movie-result">
+            <span class="neon-text">${movie.title}</span>
+            ${movie.release_date ? `(${movie.release_date.slice(0,4)})` : ''}
+            ${movie.vote_average ? `<br>Rating: ${movie.vote_average}/10` : ''}
+            <br><em>${movie.overview?.slice(0, 100)}...</em>
+        </div><br>
+    `;
+}
+
+// Chat Functions
+async function sendMessage() {
+    const message = chatInput.value.trim();
+    if (!message) return;
+
+    addMessage(message, 'user');
+    chatInput.value = '';
+
+    showTypingIndicator();
+    
+    try {
+        const response = await generateRecommendations(message);
+        addMessage(response, 'bot');
+    } catch (error) {
+        addMessage('Connection to neural film network failed...', 'bot');
+    }
+}
+
+function addMessage(text, sender) {
+    const typingIndicator = document.querySelector('.typing-indicator');
+    if (typingIndicator) typingIndicator.remove();
+
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${sender}-message`;
+    messageDiv.innerHTML = text;
+    chatMessages.appendChild(messageDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function showTypingIndicator() {
+    const typingDiv = document.createElement('div');
+    typingDiv.className = 'typing-indicator';
+    typingDiv.innerHTML = `
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+    `;
+    chatMessages.appendChild(typingDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+// Event Listeners
+sendButton.addEventListener('click', sendMessage);
+chatInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') sendMessage();
+});
+
+// Initialization
+window.addEventListener('DOMContentLoaded', () => {
+    addMessage("CineMatrix AI v2.3.1 online.<br>Input your cinematic desires...", 'bot');
+});
+
+    </script>
+
+</body>
+</html>
